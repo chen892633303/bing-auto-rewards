@@ -27,37 +27,29 @@ jobs:
       with:
         python-version: '3.9'
         
-    - name: Install Chrome and ChromeDriver
+    - name: Install Chrome 138 and ChromeDriver 138 (Chrome for Testing)
       run: |
-        # 安装Chrome
-        curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
-        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
-        sudo apt-get update
-        sudo apt-get install -y google-chrome-stable
-        
-        # 获取Chrome版本并安装兼容的ChromeDriver
-        CHROME_VERSION=$(google-chrome --version | grep -oE "[0-9]+\.[0-9]+")
-        echo "Chrome major version: $CHROME_VERSION"
-        
-        # 使用更兼容的方法安装ChromeDriver
-        # 方法1: 尝试从官方源下载
-        if wget -q --spider "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION"; then
-          echo "Official ChromeDriver available for version $CHROME_VERSION"
-          wget -O /tmp/chromedriver_version "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION"
-          CHROMEDRIVER_VERSION=$(cat /tmp/chromedriver_version)
-          wget -O /tmp/chromedriver.zip "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip"
-        else
-          echo "Official ChromeDriver not available, using fallback method"
-          # 方法2: 使用apt安装
-          sudo apt-get install -y chromium-chromedriver
-          sudo ln -sf /usr/bin/chromedriver /usr/local/bin/chromedriver
-          exit 0
-        fi
-        
-        # 解压并安装
-        unzip /tmp/chromedriver.zip -d /usr/local/bin/
-        chmod +x /usr/local/bin/chromedriver
-        rm /tmp/chromedriver.zip /tmp/chromedriver_version
+        set -eux
+    
+        CHROME_VERSION=138.0.7204.0   # ⚠️ 改成你需要的 138 精确版本
+    
+        # 下载 Chrome
+        wget -q https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chrome-linux64.zip
+        unzip chrome-linux64.zip
+        sudo mv chrome-linux64 /opt/chrome138
+    
+        # 下载 ChromeDriver
+        wget -q https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chromedriver-linux64.zip
+        unzip chromedriver-linux64.zip
+        sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+        sudo chmod +x /usr/local/bin/chromedriver
+    
+        # 设置 Chrome 路径
+        sudo ln -sf /opt/chrome138/chrome /usr/bin/google-chrome
+    
+        google-chrome --version
+        chromedriver --version
+
         
     - name: Verify Chrome and ChromeDriver
       run: |
