@@ -27,28 +27,23 @@ jobs:
       with:
         python-version: '3.9'
         
-    - name: Install Chrome 138 and ChromeDriver 138 (Chrome for Testing)
+    - name: Install Chrome 138 and ChromeDriver 138
       run: |
         set -eux
+        CHROME_VERSION=138.0.7204.0
     
-        CHROME_VERSION=138.0.7204.0   # ⚠️ 改成你需要的 138 精确版本
-    
-        # 下载 Chrome
         wget -q https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chrome-linux64.zip
         unzip chrome-linux64.zip
         sudo mv chrome-linux64 /opt/chrome138
     
-        # 下载 ChromeDriver
         wget -q https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chromedriver-linux64.zip
         unzip chromedriver-linux64.zip
         sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
         sudo chmod +x /usr/local/bin/chromedriver
     
-        # 设置 Chrome 路径
-        sudo ln -sf /opt/chrome138/chrome /usr/bin/google-chrome
-    
-        google-chrome --version
+        /opt/chrome138/chrome --version
         chromedriver --version
+    
 
         
     - name: Verify Chrome and ChromeDriver
